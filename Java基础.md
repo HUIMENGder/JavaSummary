@@ -5,13 +5,12 @@
 
 * byte/8  
 * char/16
-* short/16
+S* short/16
 * int/32
-* float/32
+* float/32S
 * long/64
 * double/64
 * boolean/~  
-
 boolean 的返回值只有两个true和false，可以用1bit进行存储，在JVM编译时会将其转换为int类型，使用1表示true，0 来表示false。  
 
 ### 二.包装类型  
@@ -119,4 +118,6 @@ String的不可变性天然具有安全性，可以在多线程安全中使用�
 #### String Pool  
 字符串常量池(String Pool)保存着所有的字符串面量（literal strings），不仅如此，还可以使⽤ String 的 intern() ⽅法在运⾏过程将字符串添加到 String Pool 中，当⼀个字符串调⽤ intern() ⽅法时，如果 String Pool 中已经存在⼀个字符串和该字符串值相等（使⽤equals() ⽅法进⾏确定），那么就会返回 String Pool 中字符串的引⽤；否则，就会在 String Pool 中添加⼀个新的字符串，并返回这个新字符串的引⽤。  
 #### new String("abc")  
-使用这种方式创建字符串会产生 
+使用这种方式创建字符串会创建两个对象(前提是String Pool 不存在"abc"字符串对象)。  
+* "abc"属于字符串面量，因此在编译的过程中会创建一个新的字符串对象，指向"abc"这个字符串面量  
+* 使用new会直接在堆区创建一个新的字符串对象
