@@ -1,7 +1,7 @@
 #### 学习笔记，仅供学习使用
-## 一· 数据类型   
+## 一、 数据类型   
 
-### 一. 基本类型
+### 基本类型
 
 * byte/8  
 * char/16
@@ -13,10 +13,10 @@ S* short/16
 * boolean/~  
 boolean 的返回值只有两个true和false，可以用1bit进行存储，在JVM编译时会将其转换为int类型，使用1表示true，0 来表示false。  
 
-### 二.包装类型  
+### 包装类型  
 基本类型都有其对应的包装类型，Java是个对象对象的语言，基本类型不具有对象的性质，为了与其他的对象“接轨”就出现了包装类型，相当于将基本类型包装起来，是他们具有了对象的性质，并且给他们添加了对应的属性和方法，丰富了基本类型的操作。 
 
-### 三.缓存池 
+### 缓存池 
 缓一些常用的数据类型可以提高程序的运行效率，Java为一些基本类型提供了缓存池来提高效率，一些基本元素以经被加入。
 #### 拆箱和装箱 
 基本类型转换成为包装类型的时候需要调用包装类型静态ValueOf()函数的，而包装类型转换成为基本类型需要调用以基本类型开头的Value()的函数，比如intvalue(),floatvalue()等。  
@@ -58,7 +58,7 @@ public static Integer valueOf(int i){
 ```  
 尤其源码可以知道，需要先判断是不是在范围内，如果在在范围内，直接调用缓存池的对象，如果不在要创建一个新的对象。  
 
-## 二.String  
+## 二、String  
 ### String类的定义  
         public final class String
         implements java.io.Serializable, Comparable<String>, CharSequence
@@ -120,4 +120,92 @@ String的不可变性天然具有安全性，可以在多线程安全中使用�
 #### new String("abc")  
 使用这种方式创建字符串会创建两个对象(前提是String Pool 不存在"abc"字符串对象)。  
 * "abc"属于字符串面量，因此在编译的过程中会创建一个新的字符串对象，指向"abc"这个字符串面量  
-* 使用new会直接在堆区创建一个新的字符串对象
+* 使用new会直接在堆区创建一个新的字符串对象  
+
+## 三、运算  
+### 参数传递
+Java参数传递是以值传递的形式传入方法的，而不是引用传递。
+传引用参数指的还是原来那个引用，但是在Java中里面的参数类型是对象复制了原来的引用到一块新的内存，两者之间没有关系。  
+#### 1.传值调用指的是什么  
+在方法调用时，传递的参数是按值的拷贝参数。 
+```
+    public class TempTest {
+        private void test1(int a){
+        //做点事情
+        }
+        public static void main(String[] args) {
+            TempTest t = new TempTest();
+            int a = 3;
+            t.test1(a);//这里传递的参数a就是按值传递
+        }
+    }  
+```  
+按值传递，传递的是值的拷贝，传递完之后就互不相关了。 
+``` 
+    public class TempTest {
+        private void test1(int a){
+            a = 5;
+            System.out.println("test1方法中的a="+a);//a=5
+        }
+        public static void main(String[] args) {
+            TempTest t = new TempTest();
+            int a = 3;
+            t.test1(a);//传递后，test1方法对变量值的改变不影响这里的a
+            System.out.println(”main方法中的a=”+a);//a=3
+        }
+    }
+```  
+#### 按址传递是什么  
+在方法调用的时候，传递的参数是按引用的方式传递的，传递的就是地址，也就是变量所对应的地址空间。  
+传递的是值的引用，在传递前后指的都是同一块内存空间  
+```
+    public class TempTest {
+        private void test1(A a){
+            a.age = 20;
+            System.out.println("test1方法中的age="+a.age);// a=20
+        }
+        public static void main(String[] args) {
+            TempTest t = new TempTest();
+            A a = new A();//传递是个对象A
+            a.age = 10;
+            t.test1(a);
+            System.out.println(”main方法中的age=”+a.age);//a=20
+        }
+    }
+    class A{
+        public int age = 0;
+    }
+```  
+#### 说明 
+（1）：“在Java里面参数传递都是按值传递”这句话的意思是：按值传递是传递的值的拷贝，按引用传递其实传递的是引用的地址值，所以统称按值传递。
+
+（2）：在Java里面只有基本类型和按照下面这种定义方式的String是按值传递，其它的都是按引用传递。就是直接使用双引号定义字符串方式。  
+### float和double  
+Java不能隐式的执行向下转换，这会使得精度降低。  
+1.1字面量属于double类型，不能直接将其直接赋值给float类型，因为这是向下转型。当你不声明是小数默认都是双精度，所以如果要使用float时要在后面加上f   
+### 隐式类型转换 
+因为字面量1是int类型，比short类型精度更高，因此不能隐式的将int类型向下转换为short类型。
+```  
+short s1 = 1;
+// s1 = s1 + 1  
+```  
+但是使用+=，++ 运算符是会进行隐式类型转换  
+```
+s1 += 1;
+s1++;  
+```  
+相当于s1+1的结果向下隐式类型转换了  
+### switch  
+在Java7之后，可以在switch判断语句中使用String对象  
+```
+String s = "a";
+switch (s) {
+ case "a":
+ System.out.println("aaa");
+ break;
+ case "b":
+ System.out.println("bbb");
+ break;
+}
+```  
+## 四、关键字
