@@ -38,7 +38,7 @@ char in the range \u0000 to \u007F           //char类型所有数据，即所�
 创建包装类型都有两种方式，两种方式都可以将基本类型传入，两种方法的区别在于：  
 new Integer(123) 每次都会创建一个新的对象  
 Integer.ValueOf(123)  每次都会调用缓存池的对象，多次调用会取得同一个对象的引用。  
-```
+```java
         Integer x = new Integer(123);  
         Integer y = new Integer(123);  
         System.out.println(x == y); // false  
@@ -61,6 +61,7 @@ public static Integer valueOf(int i){
 
 ## 二.String  
 ### String类的定义  
+```java  
         public final class String
         implements java.io.Serializable, Comparable<String>, CharSequence
         {
@@ -80,11 +81,12 @@ public static Integer valueOf(int i){
         private static final long serialVersionUID = -6849794470754667710L;
 
         ........
-        }  
+        }
+```  
 从这个定义可以看出String类是final类型的，他的所有成员变量也是final类型的，所以他是不可以被继承的。(包括包装类型等都是不可以被继承的)  
 以上代码为Java8所定义的String，可以看出内部使用char[]来存储数据，而在Java9中：  
-```
-public final class String
+```Java
+ public final class String
  implements java.io.Serializable, Comparable<String>, CharSequence {
  /** The value is used for character storage. */
  private final byte[] value;
