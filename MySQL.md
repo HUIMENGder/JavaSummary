@@ -102,4 +102,78 @@ INSERT INTO emp VALUES
 |将wu的薪水在原有基础上增加1000元(**MySql没有+=运算符**)|UPDATE emp SET salary=salary+1000 WHERE name='ww';|  
 
 #### DELETE删除操作  
-语法：**DELETE FROM表名(where )
+语法：**DELETE FROM表名(WHERE 列名=值 )**
+|操作|语法|  
+|:--:|:--:|  
+|删除表中的名称为"zs"的记录|DELETE FROM emp WHERE name='zs';|  
+|删除所有记录|DELETE FROM emp；|
+
+### DQL(SELECT关键字)  
+数据库执行DQL语句不会对数据进行改变，而是让数据库发送结果给客户端。查询的的结果是一张虚拟表。    
+基本语法：**SELECT 列名 FROM 表名；**  
+语法：  
+  SELECT selection_list /*要查询的列名称*/
+
+  FROM table_list /*要查询的表名称*/
+
+  WHERE condition /*行条件*/
+
+  GROUP BY grouping_columns /*对结果分组*/
+
+  HAVING condition /*分组后的行条件*/
+
+  ORDER BY sorting_columns /*对结果分组*/
+
+  LIMIT offset_start, row_count /*结果限定*/ 
+#### 1.基础查询 
+|方法|操作| 
+|:---:|:---:|  
+|查询所有列|SELECT* FORM 表名|  
+|查询指定列|SELECT 列名，列名... FROM emp| ; 
+#### 2.条件查询  
+条件查询就是在查询时给出WHERE子句，在WHERER子句中可以使用如下运算符及其关键字：  
+* =、!=、<>、<、<=、>、>=；
+* BETWEEN…AND；BETWEEN...AND 还可以查日期的范围
+* IN(set)；IN中的参数为查询范围，各值之间用逗号隔开
+* IS NULL； IS NOT NULL IS NULL 是进行非空判断，与之相对的是IS NOT NULL  
+* AND；
+* OR；
+* NOT；  
+#### 3.模糊查询(LIKE)  
+&emsp;模糊查询使用统配字符补充模糊的地方。通配符有两个：“_”表示任意一个字符，‘%’表示任意多个字符。使用模糊查询需要时使用关键字**LIKE**.  
+&emsp;举例：(比如我们要找的是s开头后面两位任意，第四位为0后面任意长度的学生姓名~）  
+SELECT * FROM emp WHERE sname LIKE 's__0%';  
+#### 4.字段控制查询(DISTINCT) 
+比如我们要查询emp表中的salary，想要了解每个员工的工资水平，控制字段不要查询重复的薪水。  
+**SELECT DISTINCT salary FROM emp;**  
+ 比如我们要查询每个员工的薪水与奖金之和，因为有的人补贴为null，所以简单加法运算得到的总和为null  
+ **SELECT *,salary+IFNULL(comm,0) AS total FROM emp;**  
+ #### 5.排序(ORDER BY)
+ ASC:升序(默认值)；  
+ DESC:降序   
+ **SELECT * FROM emp ORDER BY sal DESC,empno;-- sal按照升序排序，sal相同empno按照降序排序**  
+ #### 6.分组查询  
+ 例如我们要根据每一个部门来查询每个部门的工资和，就需要按部门进行分组。  
+ **子句：GROUP BY**   
+ **SELECT deptno,COUNT(*) num,SUM(sal) SUM FROM emp GROUP BY deptno ;**  
+
+ **子句:HAVING    作用是分组后对数据进行过滤，区别于WHERE**  
+ #### 7.聚合函数  
+ 聚合函数使用来做纵向运算的函数。  
+ * 1.COUNT();统计指定列不为NULL的行为记录；
+ * 2.MAX();计算指定列的最大值，如果指定列时字符串类型，那么使用字符串排序运算。(字典比较)
+ * 3.MIN()：计算指定列的最小值，如果指定列是字符串类型，那么使用字符串排序运算；（字典比较）  
+ * 4.SUM():计算指定列的数值和，如果指定列的数据类型不是数值类型，那么计算结果为0；
+ * 5.AVG():计算指定列的平均值，如果指定列的数据类型不是数值类型，那么计算结果为0；  
+### MySQL——LIMIT  
+LIMIT 用来限定查询结果的起始以及总行数。  
+与编程语言相同，这里的起始行索引也是从0开始。  
+从0行开始查询到第5行记录：
+```sql 
+SELECT * FROM emp LIMIT 0,5;
+```  
+### 查询代码的书写顺序和执行顺序   
+查询语句的书写顺序：***SELECT-FROM-WHERE-GROUP BY-HAVING-ORDER BY-LIMIT***    
+查询语句的执行顺序：***FROM-WHERE-GROUP BY-HAVING-SELECT-ORDER BY-LIMIT***  
+## 数据的完整性  
+实体(entity):代表表中的一行(一条记录)  
