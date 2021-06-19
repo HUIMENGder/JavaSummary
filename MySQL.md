@@ -1,3 +1,4 @@
+### 学习笔记，仅供学习使用  
 # MySQL知识点总结
 ## 一、数据库概述  
 &emsp;数据库(DATE BASE)是指长期保存在在计算机的存储设备上，按照一定规则组织起来，可以被各种应用或者用户共享的数据集合。  
@@ -175,5 +176,115 @@ SELECT * FROM emp LIMIT 0,5;
 ### 查询代码的书写顺序和执行顺序   
 查询语句的书写顺序：***SELECT-FROM-WHERE-GROUP BY-HAVING-ORDER BY-LIMIT***    
 查询语句的执行顺序：***FROM-WHERE-GROUP BY-HAVING-SELECT-ORDER BY-LIMIT***  
-## 数据的完整性  
-实体(entity):代表表中的一行(一条记录)  
+## 二、数据的完整性  
+实体(entity):代表表中的一行(一条记录)    
+主键不能为空或者部分不能为空的约束条件称之为实体的完整性。实体的完整性要求每一个表中的主键字段都不能为空或者时重复的值。实体完整性指的表中行的完整性。要求每一行都有唯一独特的标识符，称之为主关键字。主关键字是否可以修改，取决于主关键字与其他表之前要求的完整性。  
+作用：表示每一行的数据不重复。  
+分类：主键约束(PRIMARY KEY)唯一约束(UNIQUE)自动增长列(AUTO-INCREMENT)  
+一个列表可以有多个约束条件，约束之间用逗号隔开。  
+### 主键约束：数据唯一(数据不能重复)，且不是为null  
+***一个表中只能有一个主键约束条件，联合主键约束算是一个主键约束条件。***  
+主键约束格式：***[CONSTRAINT<约束名>]PRIMARY KEY [字段名]***
+```sql
+方法一：  
+CREATE TABLE student(
+sid INT PRIMARY KEY,
+sname VARCHAR(20)
+);
+```   
+方式二：这种方式的优点在于可以创建联合主键——同时参照所有主键 都完全相同视为数据不唯一，所有键联合为一个主键。
+```sql
+-- 创建单主键表
+CREATE TABLE student1(
+sid INT,
+sname VARCHAR(20),
+PRIMARY KEY(sid)
+);
+-- 创建联合主键表
+CREATE TABLE student1_1(
+sid INT,
+sname VARCHAR(20),
+score DOUBLE,
+PRIMARY KEY(sid,score)
+);
+```
+方式三：这种方式的优点是可以给已经存在的表添加主键且可以添加联合主键
+```sql
+-- 在表格外部给表添加单主键
+CREATE TABLE student2(
+sid INT,
+classid INT,
+sname VARCHAR(20)
+);
+ALTER TABLE student2 ADD CONSTRAINT PRIMARY KEY(sid);
+-- 在表格外部给表格添加联合主键
+CREATE TABLE student2_1(
+sid INT,
+classid INT,
+sname VARCHAR(20)
+);
+ALTER TABLE student2_1 ADD PRIMARY KEY(sid,classid);
+--CONSTRAINT 关键字可以省略
+```  
+###  UNIQUE唯一约束：数据唯一，可以有null  
+唯一约束在MySQL中可以有多个null（可以看成bug了），在ORACLE中只能有一个null，否则报错。  
+创建UNQUE约束的方法：  
+```sql
+CREATE TABLE student3(
+sid INT ,
+sname VARCHAR(20) UNIQUE
+);
+```
+```sql
+CREATE TABLE student3_2(
+sid INT ,
+sname VARCHAR(20),
+sage VARCHAR(5)
+);
+ALTER TABLE student3_2 ADD UNIQUE (sname);
+``` 
+
+删除唯一约束的方法：
+```sql
+ALTER TABLE student3_2 DROP INDEX sname;
+ -- 这样可以删除sname作为的唯一约束
+```  
+### AUTO-INCREMENT自动增长列
+自动增长列的约束是给键来自动增加的(***只针对整数***)，如果没有键定义使用AUTO-INCREMENT，会报出以下错误：
+```sql
+Incorrect table definition; there can be only one 
+auto column and it must be defined as a key
+```  
+```sql 
+CREATE TABLE student4(
+sid INT UNIQUE AUTO_INCREMENT,
+sname VARCHAR(20)
+);
+CREATE TABLE student4_1(
+sid INT PRIMARY KEY AUTO_INCREMENT,
+sname VARCHAR(20)
+);
+```  
+我们只需要输入sname，sid会自动增长  
+***注：我们在插入数据的时候sid因为被自动增长约束而整数加加，那么，如果在插入记录的时候，如果删除了插入的记录，那么编号会继续随着删除的记录的号加加，不会因为删除记录而退回重新加加。***  
+
+### 域完整性 
+&emsp;域完整性是针对具体关系型数据库的约束条件，他保证某些列不能输入无效的值。域完整性指的是列的值域的完整性，如数据类型，格式，值域，是否支持Null   
+&emsp;域完整性约束：数据类型，非空约束(NOT NULL),默认约束（DEFAULT） 检查约束（CHECK这个MySQL不支持）。   
+### 数据类型  
+数值类型，日期类型，字符串类型  
+### 非空约束(NOT NULL)
+约束添加在一个字段的定义中，约束这个字段不能有null
+### 默认值约束(DEFAULT)
+约束添加在一个字段的定义中，约定这个字段的默认填充为DEFAULT后面的内容。后面插入数据时，如果插入值与默认值相同，则此处填DEFAULT，否则填入期望值。  
+```sql 
+ALTER TABLE USER ADD COLUMN gender CHAR(3) DEFAULT '男';
+```   
+插入值与默认值相同：
+```sql
+INSERT INTO USER 
+VALUES(5,'高七','012','gaoqi@outlook.com','2000-5-1',DEFAULT);
+```  
+### 引用完整性——外键约束  
+***外键约束关键词：FOREIGN KEY ***
+&emsp;外键约束用来在两个表之间建立连接，它可以是一列或者多列。一个表可以有一个或者多个外键。外键对应的是参照完整性，一个表的外键为空值，若不为空值，那么每一个外键的值必须等于另一个表中主键的值。
