@@ -37,19 +37,19 @@ char in the range \u0000 to \u007F           //char类型所有数据，即所�
 创建包装类型都有两种方式，两种方式都可以将基本类型传入，两种方法的区别在于：  
 new Integer(123) 每次都会创建一个新的对象  
 Integer.ValueOf(123)  每次都会调用缓存池的对象，多次调用会取得同一个对象的引用。  
-```
+```java
         Integer x = new Integer(123);  
         Integer y = new Integer(123);  
         System.out.println(x == y); // false  
         Integer z = Integer.valueOf(123);
         Integer k = Integer.valueOf(123);
         System.out.println(z == k);   // true  
-        nteger z = Integer.valueOf(200);
+        Integer z = Integer.valueOf(200);
         Integer k = Integer.valueOf(200);  
         System.out.println(z == k); //false,200超过了int上限127，每次都需要创建一个新的对象  
 ```  
 其中第三点我们可以通过ValueOf()源码可以明白：  
-```
+```java
 public static Integer valueOf(int i){
         if(i >= IntegerCache.low && i <= IntegerCache.high)  
         return IntegerCache.cache[i+ (-IntegerCache.low)]; //如果在范围内直接调用缓存池的地址   
@@ -59,7 +59,8 @@ public static Integer valueOf(int i){
 尤其源码可以知道，需要先判断是不是在范围内，如果在在范围内，直接调用缓存池的对象，如果不在要创建一个新的对象。  
 
 ## 二、String  
-### String类的定义  
+### String类的定义
+```JAVA  
         public final class String
         implements java.io.Serializable, Comparable<String>, CharSequence
         {
@@ -79,10 +80,11 @@ public static Integer valueOf(int i){
         private static final long serialVersionUID = -6849794470754667710L;
 
         ........
-        }  
+        }
+```  
 从这个定义可以看出String类是final类型的，他的所有成员变量也是final类型的，所以他是不可以被继承的。(包括包装类型等都是不可以被继承的)  
 以上代码为Java8所定义的String，可以看出内部使用char[]来存储数据，而在Java9中：  
-```
+```JAVA
 public final class String
  implements java.io.Serializable, Comparable<String>, CharSequence {
  /** The value is used for character storage. */
@@ -100,7 +102,7 @@ Sting类一旦被创建就不会被改变，对于Sting类的任何操作都是�
 
 #### 不可变好处  
 因为Sting的hash值经常被使用，例如Sting用作HashMap的key。不可变的性质是的hash的值也不可改变，因此只计算一次。  
-
+    
 #### 安全性  
 Sting经常被用来作为参数，Sting的不可变性可以保证参数不变。
 
@@ -128,7 +130,7 @@ Java参数传递是以值传递的形式传入方法的，而不是引用传递�
 传引用参数指的还是原来那个引用，但是在Java中里面的参数类型是对象复制了原来的引用到一块新的内存，两者之间没有关系。  
 #### 1.传值调用指的是什么  
 在方法调用时，传递的参数是按值的拷贝参数。 
-```
+```JAVA
     public class TempTest {
         private void test1(int a){
         //做点事情
@@ -141,7 +143,7 @@ Java参数传递是以值传递的形式传入方法的，而不是引用传递�
     }  
 ```  
 按值传递，传递的是值的拷贝，传递完之后就互不相关了。 
-``` 
+```java
     public class TempTest {
         private void test1(int a){
             a = 5;
@@ -185,19 +187,19 @@ Java不能隐式的执行向下转换，这会使得精度降低。
 1.1字面量属于double类型，不能直接将其直接赋值给float类型，因为这是向下转型。当你不声明是小数默认都是双精度，所以如果要使用float时要在后面加上f   
 ### 隐式类型转换 
 因为字面量1是int类型，比short类型精度更高，因此不能隐式的将int类型向下转换为short类型。
-```  
+```JAVA  
 short s1 = 1;
 // s1 = s1 + 1  
 ```  
 但是使用+=，++ 运算符是会进行隐式类型转换  
-```
+```JAVA
 s1 += 1;
 s1++;  
 ```  
 相当于s1+1的结果向下隐式类型转换了  
 ### switch  
 在Java7之后，可以在switch判断语句中使用String对象  
-```
+```JAVA
 String s = "a";
 switch (s) {
  case "a":
@@ -300,7 +302,7 @@ x.equals(x); // true     -------自反性
 
 x.equals(y) == y.equals(x); // true      -------对称性
 
-if (x.equals(y) && y.equals(z))			-------传递性
+if (x.equals(y) && y.equals(z))			 -------传递性
     x.equals(z); // true;
   
 x.equals(y) == x.equals(y); // true			-------一致性

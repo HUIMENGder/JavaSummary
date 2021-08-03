@@ -32,13 +32,13 @@
   USE 数据库名；--使用数据库   
   SELECT DATABASE(); -- 选中数据库   
 #### 常用数据类型  
-```
+```sql
 
 int：整型
 
 double：浮点型，例如double(5,2)表示最多5位，其中必须有2位小数，即最大值为999.99；
 
-char：固定长度字符串类型； char(10)  'abc       '
+char：固定长度字符串类型； char(10)  'abc'
 
 varchar：可变长度字符串类型；varchar(10) 'abc'
 
@@ -50,7 +50,7 @@ date：日期类型，格式为：yyyy-MM-dd；
 
 time：时间类型，格式为：hh:mm:ss
 
- timestamp：时间戳类型 yyyy-MM-dd hh:mm:ss  会自动赋值
+timestamp：时间戳类型 yyyy-MM-dd hh:mm:ss  会自动赋值
 
 datetime:日期时间类型 yyyy-MM-dd 
 ```
@@ -430,3 +430,22 @@ SELECT * FROM b;
 UPDATE user SET PASSWORD=MD5(PASSWORD) WHERE id=1;  
 ``` 
 MD5加密是不可逆的，只能加密不能解密。java在与数据库交互的时候，对于加密的数据，java端也需要加密后才能进行比较。
+## SQL的窗口函数
+**窗口函数的基本语法：**
+```sql
+<窗口函数> over (partition by <用于分组的列名>
+           order by <用于排序的列名>)
+```
+<窗口函数>的位置，可以放以下两种函数：
+
+1） 专用窗口函数，包括后面要讲到的rank, dense_rank, row_number等专用窗口函数。
+
+2） 聚合函数，如sum. avg, count, max, min等
+### 专用窗口函数
+#### 1.rank()函数
+如果有并列名次的行，会占用下一名次的位置。比如正常排名是1，2，3，4，但是现在前3名是并列的名次，结果是：1，1，1，4。
+#### 2.dense_rank()函数
+如果有并列名次的行，不占用下一名次的位置。比如正常排名是1，2，3，4，但是现在前3名是并列的名次，结果是：1，1，1，2。
+#### 3.row_number()函数
+考虑并列名次的情况，比如前3名是并列的名次，排名是正常的1，2，3，4。
+#### 4.
