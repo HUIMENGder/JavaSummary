@@ -1,0 +1,1 @@
+Spring Securuty是针对spring项目的安全框架，也是spring底层的安全模块的默认技术选型。只需要引入spring-boot-stater-security依赖，在进行少量的配置即可使用。
