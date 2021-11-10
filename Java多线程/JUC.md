@@ -293,3 +293,148 @@ class Like implements ILike{
     }
 }
 ```  
+### 线程的状态
+* new(新生状态)：线程一旦创建就进入到新生状态
+* 就绪状态：调用start()方法，线程立即进入就绪状态，但是不意味立即进行调度执行
+* 阻塞状态，当调用sleep，wait或同步锁定时线程进入阻塞状态，程序不在运行，阻塞停止后，重新进入就绪状态，等待CPU调度。
+* 运行状态：线程真正执行线程体的代码块
+* 死亡状态：线程中断或者结束，一旦进入死亡状态就不能再次启动
+
+#### 线程方法
+|方法|说明|
+| --| --|
+|setPriority(int newPriority)|更改线程的优先级|
+|static void sleep(long millis)|在指定的毫秒时间内让正在执行的线程体休眠|
+|void jion()|等待该线程终止|
+|static void yield()|暂停当前的线程体，并执行其他线程|
+|void interrupt()|中断这个线程，别用|
+|boolean isAlive()|测试线程是否在活跃状态|
+**利用标志位，停止线程**
+```Java
+/**
+ * Created with IntelliJ IDEA.
+ * 测试线程停止
+ * 1.建议线程自动停止---> 利用次数，不建议死循环
+ * 2.建议使用标志位，--->设置一个标志位
+ * 3.不要使用stop，destroy等JDK不建议使用的方法
+ * @Author: 回梦
+ * @Date: 2021/11/10/20:03
+ */
+public class TestStop implements Runnable{
+    //1.设置一个标志位
+
+    private boolean flag = true;
+
+    @Override
+    public void run() {
+        int i = 0;
+        while (flag){
+            System.out.println("run.....Thread" + i++);
+        }
+    }
+    //2.设置一个公开的方法停止线程，转换标志位
+
+    public void stop(){
+        this.flag = false;
+    }
+    public static void main(String[] args) {
+        TestStop testStop = new TestStop();
+        new Thread(testStop).start();
+        for (int i = 0; i < 1000; i++) {
+            System.out.println("main" + i);
+            if(i == 900){
+                //调用stop方法切换标志位，停止线程
+                testStop.stop();
+                System.out.println("线程停止了....");
+            }
+        }
+    }
+}
+```
+**Sleep测试，获取当前时间**
+```Java
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+/**
+ * Created with IntelliJ IDEA.
+ * 测试sleep，获取当前系统时间
+ * @Author: 回梦
+ * @Date: 2021/11/10/20:21
+ */
+public class TestSleep {
+    public static void main(String[] args) {
+        Date StartTime = new Date(System.currentTimeMillis());
+        while (true){
+            try {
+                Thread.sleep(1000);
+                System.out.println(new SimpleDateFormat("HH:mm:ss").format(StartTime));
+                StartTime = new Date(System.currentTimeMillis());//更新当前时间
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+}
+```
+**线程礼让：**
+* 让当前的线程停止，但不阻塞
+* 将线程从运行状态转化为就绪状态
+* **让CPU重新调度，礼让不一定成功！**
+```Java
+/**
+ * Created with IntelliJ IDEA.
+ * 测试礼让线程
+ * @Author: 回梦
+ * @Date: 2021/11/10/20:32
+ */
+public class TestYield {
+    public static void main(String[] args) {
+        MyYield myYield = new MyYield();
+        new Thread(myYield,"a").start();
+        new Thread(myYield,"b").start();
+    }
+}
+class MyYield implements Runnable{
+    @Override
+    public void run() {
+        System.out.println(Thread.currentThread().getName()+"线程开始执行！");
+        Thread.yield();
+        System.out.println(Thread.currentThread().getName()+"线程停止执行！");
+    }
+}
+```
+**Join()合并线程**
+* 待此线程执行完后，在执行其他的线程，其他线程阻塞
+* 可以想象为插队
+```Java
+/**
+ * Created with IntelliJ IDEA.
+ * 测试Join()
+ * @Author: 回梦
+ * @Date: 2021/11/10/20:41
+ */
+public class TestJoin implements Runnable{
+
+    @Override
+    public void run() {
+        for (int i = 0; i < 1000; i++) {
+            System.out.println("线程vip来了..." + i);
+        }
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        TestJoin testJoin = new TestJoin();
+        Thread thread = new Thread(testJoin);
+        thread.start();
+        // 主线程
+        for (int i = 0; i < 500; i++) {
+            if(i == 200){
+                thread.join();//插队
+            }
+            System.out.println("main" + i);
+        }
+    }
+}
+```
