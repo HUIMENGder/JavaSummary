@@ -438,3 +438,179 @@ public class TestJoin implements Runnable{
     }
 }
 ```
+**线程的状态(Thread.State)：**
+```Java
+import javax.swing.plaf.nimbus.State;
+
+/**
+ * Created with IntelliJ IDEA.
+ * 观察并测试线程状态
+ * @Author: 回梦
+ * @Date: 2021/11/10/21:40
+ */
+public class TestState {
+    public static void main(String[] args) throws InterruptedException {
+        Thread thread = new Thread(() ->{
+            for (int i = 0; i < 5; i++) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            System.out.println("//////");
+        });
+        // 观察状态
+        Thread.State state = thread.getState();
+        System.out.println(state); //New
+
+        //观察启动
+        thread.start();
+        state = thread.getState();
+        System.out.println(state);
+
+        while(state != Thread.State.TERMINATED){
+            Thread.sleep(100);
+            state = thread.getState(); //跟新线程状态
+            System.out.println(state);
+        }
+    }
+}
+```
+
+**线程优先级：**
+* getPriority()
+* setPriority()
+```Java
+/**
+ * Created with IntelliJ IDEA.
+ * 测试线程的优先级
+ * @Author: 回梦
+ * @Date: 2021/11/12/10:23
+ */
+public class TestPriority {
+    public static void main(String[] args) {
+        System.out.println(Thread.currentThread().getName() + "----->" + Thread.currentThread().getPriority());
+        MyPriority myPriority = new MyPriority();
+        Thread t1 = new Thread(myPriority);
+        Thread t2 = new Thread(myPriority);
+        Thread t3 = new Thread(myPriority);
+        Thread t4 = new Thread(myPriority);
+
+        //先设置优先级在启动
+        t1.setPriority(1);
+        t2.setPriority(2);
+        t3.setPriority(3);
+        t4.setPriority(4);
+        t1.start();
+        t2.start();
+        t3.start();
+        t4.start();
+
+    }
+}
+class MyPriority implements Runnable{
+    @Override
+    public void run() {
+        System.out.println(Thread.currentThread().getName() + "----->" + Thread.currentThread().getPriority());
+    }
+}
+```
+**守护线程：**
+* GC垃圾回收，日志管理等
+```Java
+/**
+ * Created with IntelliJ IDEA.
+ * 测试守护线程
+ * @Author: 回梦
+ * @Date: 2021/11/12/10:34
+ */
+public class TestDaemon {
+    public static void main(String[] args) {
+        God god = new God();
+        You you = new You();
+
+        Thread thread = new Thread(god);
+        thread.setDaemon(true); //默认是false是用户线程，正常的线程都是用户线程
+        thread.start();
+        new Thread(you).start();
+    }
+}
+
+class God implements Runnable{
+    @Override
+    public void run() {
+        while (true){
+            System.out.println("上帝活着！");
+        }
+    }
+}
+
+class You implements Runnable{
+    @Override
+    public void run() {
+        for (int i = 0; i < 36500; i++) {
+            System.out.println("活着就很开心！");
+        }
+        System.out.println("goodbye!");
+    }
+}
+```
+### 线程同步
+* 线程同步其实就是一种等待机制，多个需要同时访问此对象的线程进入这个对象的等待池，等前面一个线程使用完，下一个线程在使用。
+* 解决访问冲入问题，加入的锁机制 ***synchornized***,当一个线程获得了对象的排他锁，独占资源，其他线程必须等待，使用后释放锁即可。但是会存在以下问题：
+  * 一个线程持有锁会导致其他需要使用该锁的进程挂起
+  * 在多线竞争的情况下，加锁，释放锁会导致比较多的上下文切换和调度时延，引起性能问题。
+  * 如果一个优先级较高的线程等待一个优先级较低的线程释放锁会导致性能倒置。    
+
+***synchornized:***
+* 锁的是this
+* **synchornized(Obj){}** 同步块
+  * Obj 称之为同步监视器
+    *  Obj可以是任何对象
+    *  同步方法中无需指定同步监视器，因为同步方法的同步监视器就是this，就是对象本身。
+    * 锁的对象就是变化的量，需要增删改的对象
+```Java
+/**
+ * Created with IntelliJ IDEA.
+ * synchronized保证线程安全
+ * @Author: 回梦
+ * @Date: 2021/11/12/20:04
+ */
+public class UnsafeBuyTicket {
+    public static void main(String[] args) {
+         BuyTicket station = new BuyTicket();
+         new Thread(station,"1").start();
+         new Thread(station,"2").start();
+         new Thread(station,"3").start();
+    }
+}
+
+class BuyTicket implements Runnable{
+    private int ticketNums = 20;
+    boolean flag = true;
+    @Override
+    public void run() {
+        //买票
+        while (flag){
+            try {
+                buy();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    //synchronized 同步方法，锁的是this
+
+    public synchronized void buy() throws InterruptedException {
+        //判断是否有票
+        if(ticketNums <= 0){
+            flag = false;
+            return;
+        }
+        Thread.sleep(100 );
+        System.out.println(Thread.currentThread().getName() + "拿到" + ticketNums --);
+    }
+}
+```
