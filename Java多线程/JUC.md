@@ -609,8 +609,257 @@ class BuyTicket implements Runnable{
             flag = false;
             return;
         }
-        Thread.sleep(100 );
+        Thread.sleep(100);
         System.out.println(Thread.currentThread().getName() + "拿到" + ticketNums --);
     }
+}
+```
+
+### 死锁
+* 多线程各自占用一些共享资源，并且相互等待其他线程占用的资源才能运行，而导致两个或者多个线程都在等待对方释放资源，都停止运行的情况，某一个同步块同时拥有两个对象以上的锁时，就可能发生死锁现象。
+  
+### Lock
+
+
+### 线程通信(生产者消费者模型)
+**Java中线程通信的方法：**
+|方法名|作用|
+| -- | -- |
+|wait()|表示线程一直等待，等到其他线程通知，与sleep不同，会释放锁|
+|wait(long timeout)|等待指定的毫秒数|
+|notify()|唤醒一个处于等待状态的线程|
+|notifyAll()|唤醒同一个对象上所有调用wait()方法的线程,优先级别高的线程优|
+
+**实现生产者消费者模型方法一：管程法**
+```Java
+/**
+ * Created with IntelliJ IDEA.
+ * 测试生产者消费者模型--->利用缓冲区解决：管程法
+ * @Author: 回梦
+ * @Date: 2021/11/15/15:01
+ */
+public class TestPc {
+    public static void main(String[] args) {
+        SynContainer synContainer = new SynContainer();
+        new Productor(synContainer).start();
+        new Consumer(synContainer ).start();
+    }
+}
+
+//生产者
+
+class Productor extends Thread{
+    SynContainer synContainer;
+    public Productor(SynContainer synContainer){
+        this.synContainer = synContainer;
+    }
+
+    @Override
+    public void run() {
+        for (int i = 0; i < 100; i++) {
+            synContainer.push(new Chicken(i));
+            System.out.println("生产了-->" + i + "只鸡");
+        }
+    }
+}
+
+//消费者
+
+class Consumer extends Thread{
+    SynContainer synContainer;
+    public Consumer(SynContainer synContainer){
+        this.synContainer = synContainer;
+    }
+
+    @Override
+    public void run() {
+        for (int i = 0; i < 100; i++) {
+            System.out.println("消费了-->" + synContainer.pop().id + "只鸡");
+
+        }
+    }
+}
+
+//产品
+
+class Chicken{
+    int id;
+
+    public Chicken(int id) {
+        this.id = id;
+    }
+}
+
+//缓冲区
+
+class SynContainer{
+    // 容器大小和计数器
+
+    Chicken[] chickens = new Chicken[10];
+    int count = 0;
+    // 生产者放入产品
+
+    public synchronized void  push(Chicken chicken){
+        //如果容器满了。就需要等待消费者消费
+        if(count == chickens.length){
+            //通知消费者消费，生产者等待
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        //如果容器没满，我们就需要丢入产品
+        chickens[count] = chicken;
+        count ++;
+        //可以通知消费者消费
+        this.notifyAll();
+    }
+
+    public synchronized Chicken pop(){
+        //判断能否消费
+        if(count == 0){
+            //等待生产者生产，消费者等待
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        //count是指向最新可插入的地方，上面加入是先加入在count++，所以count要先减再取
+        count --;
+        Chicken chicken = chickens[count];
+        //吃完通知生产者生产
+        this.notifyAll(); 
+        return chicken;
+    }
+}
+```
+**实现生产者消费者模型方法二：信号灯法**
+```Java
+/**
+ * Created with IntelliJ IDEA.
+ *  测试生产者消费者问题2--->信号灯法,标志位解决
+ * @Author: 回梦
+ * @Date: 2021/11/15/21:48
+ */
+public class TestPc2 {
+    public static void main(String[] args) {
+        Tv tv = new Tv();
+        new Player(tv).start();
+        new Watcher(tv).start();
+    }
+}
+
+/**
+ * 生产者--->演员
+ */
+class Player extends Thread{
+    Tv tv;
+    public Player(Tv tv){
+        this.tv = tv;
+    }
+
+    @Override
+    public void run() {
+        for (int i = 0; i < 20; i++) {
+            if(i%2 == 0){
+                this.tv.play("hhhh播放中");
+            }else {
+                this.tv.play("aaaa");
+            }
+        }
+    }
+}
+
+/**
+ * 消费者--->观众
+ */
+class Watcher extends Thread{
+    Tv tv;
+    public Watcher(Tv tv){
+        this.tv = tv;
+    }
+
+    @Override
+    public void run() {
+        for (int i = 0; i < 20; i++) {
+            tv.watch();
+        }
+    }
+}
+
+/**
+ * 产品--->节目
+ */
+class Tv{
+
+    //演员表演，观众等待
+    //观众等待，演员表演
+
+    String voice;
+    boolean flag = true;
+
+    //表演
+    public synchronized void play(String voice){
+        if (!flag){
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println("演员表演了:" + voice);
+        //通知观众观看
+        this.notifyAll();
+        this.flag = !this.flag;
+        this.voice = voice;
+    }
+    // 观看
+    public synchronized void watch(){
+        if (flag){
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println("观看了：" + voice);
+        //通知演员表演
+        this.notifyAll();
+        this.flag = !this.flag;
+    }
+}
+```
+### 线程池
+```Java
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+/**
+ * Created with IntelliJ IDEA.
+ * 测试线程池
+ * @Author: 回梦
+ * @Date: 2021/11/16/19:27
+ */
+public class TestPool {
+    public static void main(String[] args) {
+        //1.创建服务，创建线程
+        //newFixedThreadPool参数为u线程池的大小
+        ExecutorService service = Executors.newFixedThreadPool(10);
+        service.execute(new MyThread());
+        service.execute(new MyThread());
+        service.execute(new MyThread());
+        service.execute(new MyThread());
+
+        service.shutdown();
+    }
+}
+
+class MyThread implements Runnable {
+    @Override
+    public void run() {
+            System.out.println(Thread.currentThread().getName());
+        }
 }
 ```
