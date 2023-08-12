@@ -22,8 +22,8 @@ boolean 的返回值只有两个true和false，可以用1bit进行存储，在JV
 基本类型转换成为包装类型的时候需要调用包装类型静态ValueOf()函数的，而包装类型转换成为基本类型需要调用以基本类型开头的Value()的函数，比如intvalue(),floatvalue()等。  
 一般情况下，Java会自动装箱和拆箱 ：  
 ```
-        Integer x = 10 ; //自动装箱，实际应为给 Integer x = Integer.valueOf(10)    
-        int x = y ; //自动拆箱，int x = intvalue(y) 
+Integer x = 10 ; //自动装箱，实际应为给 Integer x = Integer.valueOf(10)    
+int x = y ; //自动拆箱，int x = intvalue(y) 
 ```  
 #### 缓存池介绍  
 当使用上面显示的包装类型变量时，如果其已经存在于缓存池中，则可以直接调用，如果没有则需要新创建一个对象存储相应的数据。
