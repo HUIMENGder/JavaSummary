@@ -38,15 +38,15 @@ char in the range \u0000 to \u007F           //char类型所有数据，即所�
 new Integer(123) 每次都会创建一个新的对象  
 Integer.ValueOf(123)  每次都会调用缓存池的对象，多次调用会取得同一个对象的引用。  
 ```java
-        Integer x = new Integer(123);  
-        Integer y = new Integer(123);  
-        System.out.println(x == y); // false  
-        Integer z = Integer.valueOf(123);
-        Integer k = Integer.valueOf(123);
-        System.out.println(z == k);   // true  
-        Integer z = Integer.valueOf(200);
-        Integer k = Integer.valueOf(200);  
-        System.out.println(z == k); //false,200超过了int上限127，每次都需要创建一个新的对象  
+    Integer x = new Integer(123);  
+    Integer y = new Integer(123);  
+    System.out.println(x == y); // false  
+    Integer z = Integer.valueOf(123);
+    Integer k = Integer.valueOf(123);
+    System.out.println(z == k);   // true  
+    Integer z = Integer.valueOf(200);
+    Integer k = Integer.valueOf(200);  
+    System.out.println(z == k); //false,200超过了int上限127，每次都需要创建一个新的对象  
 ```  
 其中第三点我们可以通过ValueOf()源码可以明白：  
 ```java
